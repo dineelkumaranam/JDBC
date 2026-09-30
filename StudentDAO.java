@@ -9,10 +9,12 @@ import java.util.List;
 
 public class StudentDAO {
 
-    public void save(Student student) throws SQLException {
+    public void save(Student student) throws Exception {
         String sql = "INSERT INTO students(name, age, course) VALUES (?, ?, ?)";
+
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, student.getName());
             ps.setInt(2, student.getAge());
             ps.setString(3, student.getCourse());
@@ -20,7 +22,7 @@ public class StudentDAO {
         }
     }
 
-    public List<Student> findAll() throws SQLException {
+    public List<Student> findAll() throws Exception {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT id, name, age, course FROM students ORDER BY id DESC";
 
@@ -30,20 +32,23 @@ public class StudentDAO {
 
             while (rs.next()) {
                 students.add(new Student(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getInt("age"),
-                        rs.getString("course")
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getInt("age"),
+                    rs.getString("course")
                 ));
             }
         }
+
         return students;
     }
 
-    public void update(Student student) throws SQLException {
+    public void update(Student student) throws Exception {
         String sql = "UPDATE students SET name=?, age=?, course=? WHERE id=?";
+
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, student.getName());
             ps.setInt(2, student.getAge());
             ps.setString(3, student.getCourse());
@@ -52,10 +57,12 @@ public class StudentDAO {
         }
     }
 
-    public void delete(int id) throws SQLException {
+    public void delete(int id) throws Exception {
         String sql = "DELETE FROM students WHERE id=?";
+
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             ps.executeUpdate();
         }

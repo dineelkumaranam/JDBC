@@ -8,56 +8,83 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet("/students")
 public class StudentServlet extends HttpServlet {
-    private StudentDAO dao;
 
-    @Override
-    public void init() {
-        dao = new StudentDAO();
+    private final StudentDAO dao = new StudentDAO();
+
+    private void sendJson(HttpServletResponse response, String json) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
+    }
+
+    private String esc(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
+    }
+
+    private String studentsToJson(List<Student> students) {
+        StringBuilder json = new StringBuilder("[");
+        for (int i = 0; i < students.size(); i++) {
+            Student s = students.get(i);
+            if (i > 0) json.append(",");
+            json.append("{")
+                .append("\"id\":").append(s.getId()).append(",")
+                .append("\"name\":\"").append(esc(s.getName())).append("\",")
+                .append("\"age\":").append(s.getAge()).append(",")
+                .append("\"course\":\"").append(esc(s.getCourse())).append("\"")
+                .append("}");
+        }
+        return json.append("]").toString();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+            throws IOException {
+
         try {
-            request.setAttribute("students", dao.findAll());
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
-        } catch (SQLException e) {
-            throw new ServletException("Unable to load students", e);
+            sendJson(response, studentsToJson(dao.findAll()));
+        } catch (Exception e) {
+            response.setStatus(500);
+            sendJson(response, "{\"error\":\"" + esc(e.getMessage()) + "\"}");
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-
-        request.setCharacterEncoding("UTF-8");
-        String action = request.getParameter("action");
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+            throws IOException {
 
         try {
-            if ("add".equals(action)) {
-                dao.save(readStudent(request));
-            } else if ("update".equals(action)) {
-                Student s = readStudent(request);
-                s.setId(Integer.parseInt(request.getParameter("id")));
-                dao.update(s);
-            } else if ("delete".equals(action)) {
-                dao.delete(Integer.parseInt(request.getParameter("id")));
+            String action = request.getParameter("action");
+
+            if ("delete".equalsIgnoreCase(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                dao.delete(id);
+            } else if ("update".equalsIgnoreCase(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                String name = request.getParameter("name");
+                int age = Integer.parseInt(request.getParameter("age"));
+                String course = request.getParameter("course");
+                dao.update(new Student(id, name, age, course));
+            } else {
+                String name = request.getParameter("name");
+                int age = Integer.parseInt(request.getParameter("age"));
+                String course = request.getParameter("course");
+                dao.save(new Student(name, age, course));
             }
-            response.sendRedirect(request.getContextPath() + "/students");
-        } catch (SQLException | NumberFormatException e) {
-            throw new ServletException("Student operation failed", e);
-        }
-    }
 
-    private Student readStudent(HttpServletRequest request) {
-        return new Student(
-                request.getParameter("name"),
-                Integer.parseInt(request.getParameter("age")),
-                request.getParameter("course")
-        );
+            sendJson(response, "{\"success\":true}");
+        } catch (Exception e) {
+            response.setStatus(500);
+            sendJson(response, "{\"error\":\"" + esc(e.getMessage()) + "\"}");
+        }
     }
 }

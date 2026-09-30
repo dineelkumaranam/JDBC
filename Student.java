@@ -8,14 +8,14 @@ public class Student {
 
     public Student() {}
 
-    public Student(String name, int age, String course) {
+    public Student(int id, String name, int age, String course) {
+        this.id = id;
         this.name = name;
         this.age = age;
         this.course = course;
     }
 
-    public Student(int id, String name, int age, String course) {
-        this.id = id;
+    public Student(String name, int age, String course) {
         this.name = name;
         this.age = age;
         this.course = course;

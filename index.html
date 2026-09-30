@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Node + Java + JDBC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Student Management System</h1>
+        <p>Node.js + Express + Java MVC + JDBC + MySQL</p>
+    </header>
+
+    <section class="card">
+        <h2 id="formTitle">Add Student</h2>
+
+        <form id="studentForm">
+            <input type="hidden" id="studentId">
+
+            <div class="grid">
+                <input id="name" type="text" placeholder="Student Name" required>
+                <input id="age" type="number" min="1" max="100" placeholder="Age" required>
+                <input id="course" type="text" placeholder="Course" required>
+            </div>
+
+            <button type="submit" id="saveButton">Add Student</button>
+            <button type="button" class="secondary" id="cancelButton" onclick="resetForm()">Cancel</button>
+        </form>
+
+        <p id="message"></p>
+    </section>
+
+    <section class="card">
+        <div class="tableHeader">
+            <h2>Students</h2>
+            <input id="search" type="search" placeholder="Search students..." oninput="renderStudents()">
+        </div>
+
+        <div class="tableWrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Course</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTable"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
