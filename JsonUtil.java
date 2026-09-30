@@ -1,0 +1,3 @@
+package com.studentmanagement.util;
+import com.studentmanagement.model.Student; import java.util.*;
+public final class JsonUtil {private JsonUtil(){} public static String e(String s){return s==null?"":s.replace("\\","\\\\").replace("\"","\\\"").replace("\n","\\n");} public static String s(Student x){return String.format("{\"id\":%d,\"name\":\"%s\",\"email\":\"%s\",\"course\":\"%s\",\"year\":%d,\"phone\":\"%s\"}",x.getId(),e(x.getName()),e(x.getEmail()),e(x.getCourse()),x.getYear(),e(x.getPhone()));} public static String list(List<Student>a){StringBuilder b=new StringBuilder("[");for(int i=0;i<a.size();i++){if(i>0)b.append(',');b.append(s(a.get(i)));}return b.append(']').toString();} public static String msg(String x){return "{\"message\":\""+e(x)+"\"}";}}

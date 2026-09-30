@@ -1,35 +1,8 @@
-package com.example.studentmvc.model;
-
+package com.studentmanagement.model;
 public class Student {
-    private int id;
-    private String name;
-    private int age;
-    private String course;
-
-    public Student() {}
-
-    public Student(int id, String name, int age, String course) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.course = course;
-    }
-
-    public Student(String name, int age, String course) {
-        this.name = name;
-        this.age = age;
-        this.course = course;
-    }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public int getAge() { return age; }
-    public void setAge(int age) { this.age = age; }
-
-    public String getCourse() { return course; }
-    public void setCourse(String course) { this.course = course; }
+ private int id, year; private String name,email,course,phone;
+ public Student(){}
+ public Student(int id,String name,String email,String course,int year,String phone){this.id=id;this.name=name;this.email=email;this.course=course;this.year=year;this.phone=phone;}
+ public Student(String name,String email,String course,int year,String phone){this(0,name,email,course,year,phone);}
+ public int getId(){return id;} public void setId(int v){id=v;} public String getName(){return name;} public void setName(String v){name=v;} public String getEmail(){return email;} public void setEmail(String v){email=v;} public String getCourse(){return course;} public void setCourse(String v){course=v;} public int getYear(){return year;} public void setYear(int v){year=v;} public String getPhone(){return phone;} public void setPhone(String v){phone=v;}
 }

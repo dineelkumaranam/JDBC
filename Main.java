@@ -1,0 +1,3 @@
+package com.studentmanagement;
+import com.studentmanagement.config.DatabaseConfig; import com.studentmanagement.controller.StudentController; import com.sun.net.httpserver.HttpServer; import java.net.*; import java.sql.*;
+public class Main {public static void main(String[]a)throws Exception{Class.forName("com.mysql.cj.jdbc.Driver");try(Connection c=DriverManager.getConnection(DatabaseConfig.URL,DatabaseConfig.USER,DatabaseConfig.PASSWORD)){System.out.println("MySQL connected");}HttpServer h=HttpServer.create(new InetSocketAddress(DatabaseConfig.PORT),0);h.createContext("/api/students",new StudentController()::handle);h.start();System.out.println("Java API: http://localhost:8080");}}
