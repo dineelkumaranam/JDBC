@@ -1,7 +1,62 @@
-package com.studentmanagement.controller;
-import com.studentmanagement.model.Student; import com.studentmanagement.service.StudentService; import com.studentmanagement.util.JsonUtil; import com.sun.net.httpserver.*; import java.io.*; import java.nio.charset.StandardCharsets; import java.util.*;
-public class StudentController {private final StudentService s=new StudentService(); public void handle(HttpExchange x)throws IOException{try{cors(x);String m=x.getRequestMethod(),p=x.getRequestURI().getPath();String[] z=p.split("/");if(m.equals("OPTIONS")){send(x,204,"");return;} if(z.length==3&&m.equals("GET")){send(x,200,JsonUtil.list(s.all()));return;} if(z.length==4){int id=Integer.parseInt(z[3]);if(m.equals("GET")){Student a=s.one(id);send(x,a==null?404:200,a==null?JsonUtil.msg("Not found"):JsonUtil.s(a));return;} if(m.equals("DELETE")){send(x,s.delete(id)?200:404,JsonUtil.msg(s.delete(id)?"Deleted":"Not found"));return;} if(m.equals("PUT")){Student a=parse(body(x));send(x,s.update(id,a)?200:404,JsonUtil.msg(s.update(id,a)?"Updated":"Not found"));return;}} if(z.length==3&&m.equals("POST")){send(x,201,JsonUtil.s(s.add(parse(body(x)))));return;} send(x,404,JsonUtil.msg("Route not found"));}catch(IllegalArgumentException e){send(x,400,JsonUtil.msg(e.getMessage()));}catch(Exception e){e.printStackTrace();send(x,500,JsonUtil.msg("Server/database error"));}finally{x.close();}}
- private void cors(HttpExchange x){x.getResponseHeaders().set("Content-Type","application/json; charset=UTF-8");x.getResponseHeaders().set("Access-Control-Allow-Origin","*");x.getResponseHeaders().set("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");x.getResponseHeaders().set("Access-Control-Allow-Headers","Content-Type");}
- private String body(HttpExchange x)throws IOException{return new String(x.getRequestBody().readAllBytes(),StandardCharsets.UTF_8);}
- private void send(HttpExchange x,int code,String b)throws IOException{byte[] q=b.getBytes(StandardCharsets.UTF_8);x.sendResponseHeaders(code,q.length);try(OutputStream o=x.getResponseBody()){o.write(q);}}
- private Student parse(String j){Map<String,String>m=new HashMap<>();String q=j.trim().replaceAll("^[{]|[}]$","");for(String a:q.split(",(?=\\\")")){String[]v=a.split(":",2);if(v.length==2)m.put(v[0].trim().replace("\"",""),v[1].trim().replace("\"",""));}return new Student(m.get("name"),m.get("email"),m.get("course"),Integer.parseInt(m.getOrDefault("year","0")),m.get("phone"));}}
+package com.example.student.controller;
+
+import com.example.student.model.Student;
+import com.example.student.service.StudentService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.List;
+
+public class StudentController {
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final StudentService service = new StudentService();
+
+    public void run() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+                ObjectNode response = mapper.createObjectNode();
+                try {
+                    JsonNode request = mapper.readTree(line);
+                    response.put("requestId", request.get("requestId").asInt());
+                    String action = request.get("action").asText();
+
+                    switch (action) {
+                        case "list" -> {
+                            List<Student> students = service.list();
+                            response.put("ok", true);
+                            response.set("students", mapper.valueToTree(students));
+                        }
+                        case "add" -> {
+                            Student s = mapper.treeToValue(request.get("student"), Student.class);
+                            Student saved = service.add(s);
+                            response.put("ok", true);
+                            response.set("student", mapper.valueToTree(saved));
+                        }
+                        case "get" -> {
+                            Student s = service.get(request.get("id").asInt());
+                            response.put("ok", true);
+                            response.set("student", mapper.valueToTree(s));
+                        }
+                        case "delete" -> {
+                            service.delete(request.get("id").asInt());
+                            response.put("ok", true);
+                        }
+                        default -> throw new IllegalArgumentException("Unknown action: " + action);
+                    }
+                } catch (Exception e) {
+                    response.put("ok", false);
+                    response.put("error", e.getMessage() == null ? "Server error" : e.getMessage());
+                }
+                System.out.println(mapper.writeValueAsString(response));
+                System.out.flush();
+            }
+        } catch (Exception e) {
+            System.err.println("Java controller stopped: " + e.getMessage());
+        }
+    }
+}

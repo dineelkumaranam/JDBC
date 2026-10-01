@@ -1,12 +1,70 @@
-package com.studentmanagement.dao;
-import com.studentmanagement.config.DatabaseConfig; import com.studentmanagement.model.Student; import java.sql.*; import java.util.*;
+package com.example.student.dao;
+
+import com.example.student.config.DatabaseConnection;
+import com.example.student.model.Student;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class StudentDAO {
- private Connection c() throws SQLException{return DriverManager.getConnection(DatabaseConfig.URL,DatabaseConfig.USER,DatabaseConfig.PASSWORD);}
- public List<Student> all() throws SQLException {List<Student> a=new ArrayList<>(); try(Connection c=c();PreparedStatement p=c.prepareStatement("select id,name,email,course,year,phone from students order by id desc");ResultSet r=p.executeQuery()){while(r.next())a.add(map(r));}return a;}
- public Student one(int id)throws SQLException{try(Connection c=c();PreparedStatement p=c.prepareStatement("select id,name,email,course,year,phone from students where id=?")){p.setInt(1,id);try(ResultSet r=p.executeQuery()){return r.next()?map(r):null;}}}
- public Student add(Student s)throws SQLException{try(Connection c=c();PreparedStatement p=c.prepareStatement("insert into students(name,email,course,year,phone) values(?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS)){set(p,s);p.executeUpdate();try(ResultSet k=p.getGeneratedKeys()){if(k.next())s.setId(k.getInt(1));}return s;}}
- public boolean update(int id,Student s)throws SQLException{try(Connection c=c();PreparedStatement p=c.prepareStatement("update students set name=?,email=?,course=?,year=?,phone=? where id=?")){set(p,s);p.setInt(6,id);return p.executeUpdate()>0;}}
- public boolean delete(int id)throws SQLException{try(Connection c=c();PreparedStatement p=c.prepareStatement("delete from students where id=?")){p.setInt(1,id);return p.executeUpdate()>0;}}
- private void set(PreparedStatement p,Student s)throws SQLException{p.setString(1,s.getName());p.setString(2,s.getEmail());p.setString(3,s.getCourse());p.setInt(4,s.getYear());p.setString(5,s.getPhone());}
- private Student map(ResultSet r)throws SQLException{return new Student(r.getInt("id"),r.getString("name"),r.getString("email"),r.getString("course"),r.getInt("year"),r.getString("phone"));}
+
+    public Student add(Student s) throws SQLException {
+        String sql = "INSERT INTO students(name,email,age,course,phone) VALUES(?,?,?,?,?)";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, s.getName());
+            ps.setString(2, s.getEmail());
+            ps.setInt(3, s.getAge());
+            ps.setString(4, s.getCourse());
+            ps.setString(5, s.getPhone());
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) s.setId(rs.getInt(1));
+            }
+            return findById(s.getId());
+        }
+    }
+
+    public List<Student> findAll() throws SQLException {
+        List<Student> list = new ArrayList<>();
+        String sql = "SELECT * FROM students ORDER BY id DESC";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) list.add(map(rs));
+        }
+        return list;
+    }
+
+    public Student findById(int id) throws SQLException {
+        String sql = "SELECT * FROM students WHERE id=?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return map(rs);
+            }
+        }
+        throw new SQLException("Student not found.");
+    }
+
+    public void delete(int id) throws SQLException {
+        String sql = "DELETE FROM students WHERE id=?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            if (ps.executeUpdate() == 0) throw new SQLException("Student not found.");
+        }
+    }
+
+    private Student map(ResultSet rs) throws SQLException {
+        Timestamp ts = rs.getTimestamp("created_at");
+        return new Student(
+            rs.getInt("id"), rs.getString("name"), rs.getString("email"),
+            rs.getInt("age"), rs.getString("course"), rs.getString("phone"),
+            ts == null ? "" : ts.toString()
+        );
+    }
 }

@@ -1,3 +1,22 @@
-package com.studentmanagement.service;
-import com.studentmanagement.dao.StudentDAO; import com.studentmanagement.model.Student; import java.sql.SQLException; import java.util.*;
-public class StudentService {private final StudentDAO d=new StudentDAO(); public List<Student> all()throws SQLException{return d.all();} public Student one(int id)throws SQLException{return d.one(id);} public Student add(Student s)throws SQLException{valid(s);return d.add(s);} public boolean update(int id,Student s)throws SQLException{valid(s);return d.update(id,s);} public boolean delete(int id)throws SQLException{return d.delete(id);} private void valid(Student s){if(s==null||blank(s.getName())||blank(s.getEmail())||blank(s.getCourse()))throw new IllegalArgumentException("Name, email and course are required");if(s.getYear()<1||s.getYear()>6)throw new IllegalArgumentException("Year must be 1-6");} private boolean blank(String x){return x==null||x.trim().isEmpty();}}
+package com.example.student.service;
+
+import com.example.student.dao.StudentDAO;
+import com.example.student.model.Student;
+import java.sql.SQLException;
+import java.util.List;
+
+public class StudentService {
+    private final StudentDAO dao = new StudentDAO();
+
+    public Student add(Student s) throws SQLException {
+        if (s.getName() == null || s.getName().isBlank()) throw new SQLException("Name is required.");
+        if (s.getEmail() == null || !s.getEmail().contains("@")) throw new SQLException("Valid email is required.");
+        if (s.getAge() < 1 || s.getAge() > 120) throw new SQLException("Age must be between 1 and 120.");
+        if (s.getCourse() == null || s.getCourse().isBlank()) throw new SQLException("Course is required.");
+        return dao.add(s);
+    }
+
+    public List<Student> list() throws SQLException { return dao.findAll(); }
+    public Student get(int id) throws SQLException { return dao.findById(id); }
+    public void delete(int id) throws SQLException { dao.delete(id); }
+}

@@ -1,0 +1,22 @@
+student-management-system/
+├── database/
+│   └── student_management.sql
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── node-server/
+│   ├── package.json
+│   └── server.js
+├── java-backend/
+│   ├── pom.xml
+│   └── src/main/java/com/example/student/
+│       ├── Application.java
+│       ├── config/DatabaseConnection.java
+│       ├── controller/StudentController.java
+│       ├── dao/StudentDAO.java
+│       ├── model/Student.java
+│       ├── service/StudentService.java
+│       └── view/StudentView.java
+├── README.md
+└── .gitignore

@@ -1,1 +1,48 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Student Management</title><style>body{font-family:Arial;margin:0;background:#eef2ff;color:#172033}header{background:#4f46e5;color:white;padding:30px;text-align:center}.wrap{max-width:1100px;margin:25px auto;padding:15px;display:grid;grid-template-columns:330px 1fr;gap:20px}.card{background:white;padding:22px;border-radius:16px;box-shadow:0 8px 25px #0001}input,select{width:100%;padding:11px;margin:6px 0 12px;box-sizing:border-box;border:1px solid #ccd;border-radius:8px}button{padding:9px 13px;border:0;border-radius:8px;cursor:pointer;margin:2px}.primary{background:#4f46e5;color:#fff}.danger{background:#fee2e2;color:#991b1b}table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}.table{overflow:auto}@media(max-width:800px){.wrap{grid-template-columns:1fr}}</style></head><body><header><h1>🎓 Student Management System</h1><p>Node.js + Express + Java MVC + JDBC + MySQL</p></header><div class="wrap"><div class="card"><h2 id="title">Add Student</h2><form id="f"><input type="hidden" id="id"><label>Name</label><input id="name" required><label>Email</label><input id="email" type="email" required><label>Course</label><input id="course" required><label>Year</label><select id="year" required><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option></select><label>Phone</label><input id="phone"><button class="primary">Save</button><button type="button" onclick="reset()">Clear</button></form></div><div class="card"><h2>Students</h2><input id="search" placeholder="Search..." oninput="render()"><div class="table"><table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Course</th><th>Year</th><th>Phone</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div></div></div><script>let a=[];const $=x=>document.getElementById(x);async function load(){try{let r=await fetch('/api/students');a=await r.json();render()}catch(e){alert('Start Java backend first')}}function render(){let q=$('search').value.toLowerCase();$('rows').innerHTML=a.filter(s=>(s.name+' '+s.email+' '+s.course).toLowerCase().includes(q)).map(s=>`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email}</td><td>${s.course}</td><td>${s.year}</td><td>${s.phone||''}</td><td><button onclick="edit(${s.id})">Edit</button><button class="danger" onclick="del(${s.id})">Delete</button></td></tr>`).join('')}</script><script>function edit(id){let s=a.find(x=>x.id==id);$('id').value=s.id;$('name').value=s.name;$('email').value=s.email;$('course').value=s.course;$('year').value=s.year;$('phone').value=s.phone||'';$('title').textContent='Edit Student'}function reset(){$('f').reset();$('id').value='';$('title').textContent='Add Student'}$('f').onsubmit=async e=>{e.preventDefault();let id=$('id').value,d={name:$('name').value,email:$('email').value,course:$('course').value,year:+$('year').value,phone:$('phone').value};let r=await fetch('/api/students'+(id?'/'+id:''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let x=await r.json();if(!r.ok)return alert(x.message);reset();load()};async function del(id){if(confirm('Delete student?')){await fetch('/api/students/'+id,{method:'DELETE'});load()}}load()</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Student Management System</h1>
+    <p>Node.js + Express + Java MVC + JDBC + MySQL</p>
+  </div>
+</header>
+
+<main>
+<section class="card">
+<h2>Add Student</h2>
+<form id="studentForm">
+  <div class="grid">
+    <input name="name" placeholder="Student name" required>
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="age" type="number" min="1" max="120" placeholder="Age" required>
+    <input name="course" placeholder="Course" required>
+    <input name="phone" placeholder="Phone">
+  </div>
+  <button type="submit">Save Student</button>
+</form>
+<p id="message"></p>
+</section>
+
+<section class="card">
+<div class="toolbar">
+  <h2>Student Records</h2>
+  <input id="search" placeholder="Search by name or course...">
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Age</th><th>Course</th><th>Phone</th><th>Actions</th></tr></thead>
+<tbody id="studentTable"></tbody>
+</table>
+</div>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
