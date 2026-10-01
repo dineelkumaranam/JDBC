@@ -68,6 +68,8 @@ The Node server starts the Java backend automatically.
 - Search students by name/course
 - Delete student
 - Export an individual student record as an HTML document
+- Save exported individual records inside `student_records/`
+- Download all student records as one HTML document
 - MySQL persistence
 - Java MVC separation
 - JDBC prepared statements

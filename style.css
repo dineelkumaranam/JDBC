@@ -21,3 +21,5 @@ th{background:#f8fafc}
 .doc{background:#059669}
 #message{font-weight:600}
 @media(max-width:700px){header h1{font-size:25px}.toolbar{align-items:stretch;flex-direction:column}}
+
+.export-all{margin:0;background:#059669}
